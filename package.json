@@ -11,5 +11,8 @@
     "Codeprez"
   ],
   "author": "Étienne LEMÉE, Rémy BAMAS LUNAY",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^7.0.1"
+  }
 }
