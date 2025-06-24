@@ -1,7 +1,6 @@
 import { readFile, access, writeFile, rm, mkdir, constants } from 'node:fs/promises'
-import { createWriteStream } from 'node:fs'
 import { basename, extname, join } from 'node:path'
-import archiver from 'archiver';
+import { getArgs } from './getArgs';
 
 const separate = async () => {
     const { folder } = getArgs();
@@ -22,26 +21,3 @@ const writeSlides = async  (slides, file, slidesFolder) => {
         await writeFile(join(slidesFolder, `${basename(file, extname(file))}-${i+1}${extname(file)}`), slides[i])
     }
 }
-
-const archive = () => {
-    const {folder} = getArgs()
-    const output = createWriteStream(`./archives/${folder}.codeprez`)
-    const archive = archiver('zip', {
-        zlib: {level: 9}
-    })
-    archive.pipe(output)
-    archive.directory(`./presentations/${folder}`, false)
-    archive.finalize()
-}
-
-const getArgs = () => {
-    if (process.argv.length < 3) {
-        console.error("Usage : npm run start <folder>")
-        process.exit()
-    }
-    return {
-        folder: process.argv[2]
-    }
-}
-
-separate();
