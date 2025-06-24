@@ -8,18 +8,18 @@ const separate = async () => {
     try {
         await access(`./presentations/${folder}/presentation.md`, constants.R_OK);
         const content = await readFile(`./presentations/${folder}/presentation.md`, {encoding : "utf-8"});
-        const segments = content.split("---")
-        await writeSegments(segments, `${folder}/presentation.md`, `./presentations/${folder}/segments`)
+        const slides = content.split("---")
+        await writeSlides(slides, `${folder}/presentation.md`, `./presentations/${folder}/slides`)
     } catch (e) {
         console.error("Could not access folder " + folder + " : " + e)
     }
 }
 
-const writeSegments = async  (segments, file, segmentsFolder) => {
-    await rm(segmentsFolder, {recursive : true, force : true})
-    await mkdir(segmentsFolder)
-    for(let i = 0; i < segments.length; i++){
-        await writeFile(join(segmentsFolder, `${basename(file)}-${i+1}${extname(file)}`), segments[i])
+const writeSlides = async  (slides, file, slidesFolder) => {
+    await rm(slidesFolder, {recursive : true, force : true})
+    await mkdir(slidesFolder)
+    for(let i = 0; i < slides.length; i++){
+        await writeFile(join(slidesFolder, `${basename(file, extname(file))}-${i+1}${extname(file)}`), slides[i])
     }
 }
 
@@ -44,4 +44,4 @@ const getArgs = () => {
     }
 }
 
-archive();
+separate();
