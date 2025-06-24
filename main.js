@@ -33,11 +33,9 @@ const fileMenuTemplate = [
         label: "Open slide",
         accelerator: "CTRL+O",
         click: async () => {
-            
-            console.log("coucou")
             let result = await dialog.showOpenDialog(mainWindow, {properties : ['openFile']})
             const file = result.filePaths
-            unZipFile(file, "./presentations")
+            unZipFile(file[0], "./presentation")
         }
     },
     { type: "separator" },
