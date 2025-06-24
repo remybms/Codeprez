@@ -1,11 +1,15 @@
-import { BrowserWindow, Menu, app } from "electron";
+import { BrowserWindow, Menu, app, dialog } from "electron";
 import { dirname } from 'path'
 import { fileURLToPath } from "url";
+import { unZipFile } from "./scripts/unzip.js";
+ 
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
+let mainWindow
+
 const createWindow = () => {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         show: false,
@@ -20,15 +24,21 @@ const createWindow = () => {
         mainWindow.loadURL("http://localhost:3000")
     }
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
+        mainWindow.maximize()
     })
 }
 
 const fileMenuTemplate = [
     {
-        label: "Do something",
-        accelerator: "CTRL+D",
-        click: () => { console.log("Hello !") }
+        label: "Open slide",
+        accelerator: "CTRL+O",
+        click: async () => {
+            
+            console.log("coucou")
+            let result = await dialog.showOpenDialog(mainWindow, {properties : ['openFile']})
+            const file = result.filePaths
+            unZipFile(file, "./presentations")
+        }
     },
     { type: "separator" },
 ]
@@ -42,7 +52,7 @@ const appMenu = Menu.buildFromTemplate([
         label: "File",
         accelerator: "CTRL+I",
         submenu: fileMenuTemplate
-    }
+    },
 ])
 
 Menu.setApplicationMenu(appMenu)
