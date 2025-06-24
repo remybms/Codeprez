@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 
-function runCommand(command, args = []) {
+function runEnvCommands(command, args = []) {
   const envDir = path.join(process.cwd(), "presentation", "env");
 
   const child = spawn(command, args, {
@@ -30,9 +30,9 @@ function runCommand(command, args = []) {
 
 const input = process.argv.slice(2);
 if (input.length === 0) {
-  console.log("Usage: node runCommand.js <commande> [arguments]");
+  console.log("Usage: node runEnvCommands.js <commande> [arguments]");
   process.exit(1);
 }
 
 const [command, ...args] = input;
-runCommand(command, args);
+runEnvCommands(command, args);
