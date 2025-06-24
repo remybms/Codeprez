@@ -1,18 +1,22 @@
 {
   "name": "codeprez",
-  "version": "1.0.0",
-  "description": "Codeprez App",
-  "main": "index.js",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node scripts/start.js",
+    "dev": "next dev",
+    "build": "next build",
+    "next:start": "next start",
+    "lint": "next lint",
+    "electron:start": "electron ."
   },
-  "keywords": [
-    "Codeprez"
-  ],
-  "author": "Étienne LEMÉE, Rémy BAMAS LUNAY",
-  "license": "MIT",
   "dependencies": {
+    "electron": "^36.5.0",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
     "archiver": "^7.0.1",
     "unzipper": "^0.12.3"
   }
