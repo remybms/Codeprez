@@ -15,7 +15,7 @@ const createWindow = () => {
         width: 800,
         height: 600,
         show: false,
-        icon: "./icon.png",
+        icon: "./src/app/logo/codeprez-logo.png",
         backgroundColor: 'rgb(37 37 37)',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
