@@ -11,10 +11,10 @@ export default function Home() {
       <img src="/logo/codeprez-full-logo.png" alt="CodePrez Logo" style={{ width: "200px"}} />
       <br/>
       <br/>
-      <button
+      {/* <button
       onClick={() => router.push("/create-archive")}>
       Create an archive
-      </button>    
+      </button>     */}
     </main>
   );
 }

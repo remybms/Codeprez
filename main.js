@@ -8,7 +8,7 @@ import path from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-let mainWindow
+let mainWindow;
 
 const createWindow = () => {
     mainWindow = new BrowserWindow({
@@ -43,6 +43,15 @@ const fileMenuTemplate = [
             unZipFile(file[0], "./presentation")
         }
     },
+    {
+        label: "Save codeprez",
+        accelerator: "CTRL+S",
+        click: () => {
+            if (mainWindow) {
+                mainWindow.loadURL("http://localhost:3000/create-archive");
+            }
+        }
+    },
     { type: "separator" },
 ]
 
@@ -67,17 +76,17 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.handle("select-file", async (event, options) => {
-  const result = await dialog.showOpenDialog(mainWindow, options);
-  return result.filePaths[0] || null;
+    const result = await dialog.showOpenDialog(mainWindow, options);
+    return result.filePaths[0] || null;
 });
 
 ipcMain.handle("create-archive", async (event, data) => {
-  try {
-    await createCodePrezArchive(data);
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: err.message };
-  }
+    try {
+        await createCodePrezArchive(data);
+        return { success: true };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
 });
 
 const launch = async () => {
