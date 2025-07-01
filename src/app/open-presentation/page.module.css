@@ -19,11 +19,6 @@
     display: flex;
     gap: 10%;
 }
-
-.presentationContainer {
-    display: flex;
-    gap: 2rem;
-}
 .presentationContainer button {
     margin-top: 1rem;
     border: none;
