@@ -40,7 +40,7 @@ export default function Home() {
       </a>
       
       <div className={styles.createArchiveContainer}>
-        <h1>Make a .codeprez archive</h1>
+        <h2>Make a .codeprez archive</h2>
         <label>
         Title of the presentation :
         <input type="text" value={title} onChange={e => setTitle(e.target.value)} />

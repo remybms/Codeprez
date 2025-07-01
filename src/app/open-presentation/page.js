@@ -11,8 +11,9 @@ export default function Home() {
       </a>
       
       <div >
-        <h1>Presentation mode</h1>
-        
+        <h2>Presentation mode</h2>
+        {/* /slides -> .md */}
+      
 
         <div >
           {/* <button onClick={handleSubmit}>Create .codeprez</button> */}
