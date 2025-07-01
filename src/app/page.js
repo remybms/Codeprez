@@ -8,16 +8,16 @@ import hljs from 'highlight.js'
 export default function Home() {
 
   const md = new MarkdownIt({
-  highlight: function (str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(str, { language: lang }).value;
-      } catch (__) {}
-    }
+    highlight: function (str, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return hljs.highlight(str, { language: lang }).value;
+        } catch (__) { }
+      }
 
-    return '';
-  }
-});
+      return '';
+    }
+  });
 
   React.useEffect(() => {
     let openedFile = "";
@@ -29,7 +29,7 @@ export default function Home() {
       link.rel = 'stylesheet';
       link.href = '/style.css';
       document.head.appendChild(link);
-      hljs.configure({classPrefix: ""})
+      hljs.configure({ classPrefix: "" })
       hljs.highlightAll()
       markdown.innerHTML = md.render(data)
       slidesList.innerHTML = ""
@@ -44,8 +44,21 @@ export default function Home() {
       }
     })
 
-    window.api.onFileContent((content) => {
+    window.api.onFileContent(async (content) => {
       markdown.innerHTML = md.render(content)
+      document.querySelectorAll('a').forEach(async (link) => {
+        console.log(link.href)
+        if (link.href.includes('.js')) {
+          const res = await fetch(link.href);
+          const code = await res.text();
+          const pre = document.createElement('pre');
+          const codeBlock = document.createElement('code');
+          codeBlock.textContent = code;
+          pre.appendChild(codeBlock);
+          link.replaceWith(pre);
+          hljs.highlightAll()
+        }
+      });
       hljs.highlightAll()
     })
   }, [])
@@ -55,7 +68,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <nav className={styles.nav}><ul className={styles.list}></ul></nav>
-        <div id="presentation" className={styles.presentation}></div>
+        <section id="presentation" className={styles.presentation}></section>
       </main>
     </div>
   );
