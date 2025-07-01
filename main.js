@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { unZipFile } from "./scripts/unzip.js";
 import { access, readdir, readFile, constants } from "node:fs/promises";
 import { separate } from "./scripts/separate.js";
+import { createCodePrezArchive } from "./scripts/createArchive.js";
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
