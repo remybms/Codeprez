@@ -94,9 +94,26 @@ const presentationMenuTemplate = [
     {
         label: "Open presentation mode",
         accelerator: "CTRL+P",
-        click: () => {
+        click: async () => {
             if (mainWindow) {
-                mainWindow.loadURL("http://localhost:3000/open-presentation");
+                const slidesDir = './public/slides';
+                try {
+                    const files = await readdir(slidesDir);
+                    const mdFiles = files.filter(f => f.endsWith('.md'));
+                    if (mdFiles.length > 0) {
+                        const firstMd = mdFiles[0];
+                        const content = await readFile(join(slidesDir, firstMd), { encoding: 'utf-8' });
+                        mainWindow.loadURL("http://localhost:3000/open-presentation");
+                        // mainWindow.webContents.removeAllListeners('did-finish-load');
+                        mainWindow.webContents.on('did-finish-load', () => {
+                            mainWindow.webContents.send("file-content", content);
+                        });
+                    } else {
+                        dialog.showErrorBox("No Markdown File", "No .md file found in public/slides.");
+                    }
+                } catch (err) {
+                    dialog.showErrorBox("Error", err.message);
+                }
             }
         }
     },
@@ -137,6 +154,43 @@ ipcMain.handle("create-archive", async (event, data) => {
     try {
         await createCodePrezArchive(data);
         return { success: true };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle("get-presentation-md", async () => {
+    const slidesDir = './public/slides';
+    try {
+        const files = await readdir(slidesDir);
+        const mdFiles = files.filter(f => f.endsWith('.md'));
+        if (mdFiles.length > 0) {
+            const firstMd = mdFiles[0];
+            const content = await readFile(join(slidesDir, firstMd), { encoding: 'utf-8' });
+            return { success: true, content };
+        } else {
+            return { success: false, error: "No .md file found in public/slides." };
+        }
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle("get-slides-list", async () => {
+    const slidesDir = './public/slides';
+    try {
+        const files = await readdir(slidesDir);
+        const mdFiles = files.filter(f => f.endsWith('.md'));
+        return { success: true, files: mdFiles };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+ipcMain.handle("get-slide-content", async (event, filename) => {
+    const slidesDir = './public/slides';
+    try {
+        const content = await readFile(join(slidesDir, filename), { encoding: 'utf-8' });
+        return { success: true, content };
     } catch (err) {
         return { success: false, error: err.message };
     }
