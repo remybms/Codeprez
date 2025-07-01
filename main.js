@@ -1,14 +1,15 @@
-import { BrowserWindow, Menu, app, dialog } from "electron";
-import { dirname } from 'path'
+import { BrowserWindow, Menu, app, dialog, ipcMain } from "electron";
+import { dirname, join } from 'path'
 import { fileURLToPath } from "url";
 import { unZipFile } from "./scripts/unzip.js";
-import { ipcMain } from "electron";
-import { createCodePrezArchive } from "./scripts/createArchive.js";
-import path from "path";
+import { access, readdir, readFile, constants } from "node:fs/promises";
+import { separate } from "./scripts/separate.js";
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-let mainWindow;
+let mainWindow
+const openFiles = {};
 
 const createWindow = () => {
     mainWindow = new BrowserWindow({
@@ -18,9 +19,7 @@ const createWindow = () => {
         icon: "./public/logo/codeprez-logo.png",
         backgroundColor: 'rgb(37 37 37)',
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
-            nodeIntegration: false,
+            preload: join(__dirname, "preload.js"),
         }
     })
     if (process.env.NODE_ENV == "production") {
@@ -33,18 +32,33 @@ const createWindow = () => {
     })
 }
 
+ipcMain.on("open-file", async (e, data) => {
+    try {
+        const win = BrowserWindow.getFocusedWindow();
+        const path = join('./public/slides/', data);
+        await access(path, constants.F_OK | constants.R_OK | constants.W_OK);
+        const content = await readFile(path, { encoding: "utf-8" });
+        win.webContents.send("file-content", content);
+        openFiles[path] = content;
+        win.openedFile = path;
+    }
+    catch (e) {
+        dialog.showErrorBox("File not found", "Could not open requested file : " + e);
+    }
+})
+
 const fileMenuTemplate = [
     {
-        label: "Open slide",
-        accelerator: "CTRL+O",
-        click: async () => {
-            let result = await dialog.showOpenDialog(mainWindow, {properties : ['openFile']})
-            const file = result.filePaths
-            unZipFile(file[0], "./presentation")
+        label: "Home page",
+        accelerator: "CTRL+H",
+        click: () => {
+            if (mainWindow) {
+                mainWindow.loadURL("http://localhost:3000");
+            }
         }
     },
     {
-        label: "Save codeprez",
+        label: "Make a codeprez archive",
         accelerator: "CTRL+S",
         click: () => {
             if (mainWindow) {
@@ -53,17 +67,73 @@ const fileMenuTemplate = [
         }
     },
     { type: "separator" },
+    {
+        label: "Open slide",
+        accelerator: "CTRL+O",
+        click: async () => {
+            const win = BrowserWindow.getFocusedWindow();
+            let result = await dialog.showOpenDialog(mainWindow, {
+                properties: ['openFile'],
+                filters: [{ name: "Codeprez", extensions: ['codeprez'] }]
+            })
+            if (!result.canceled) {
+                const file = result.filePaths
+                await unZipFile(file[0], "./public")
+                await separate()
+                const content = (await readFile(`./public/presentation.md`)).toString()
+                const files = await readdir('./public/slides')
+                win.webContents.send("open-folder", { content: content, files })
+            }
+        }
+    },
+    { type: "separator" },
+    
+]
+
+const presentationMenuTemplate = [
+    {
+        label: "Open presentation mode",
+        accelerator: "CTRL+P",
+        click: async () => {
+            if (mainWindow) {
+                const slidesDir = './public/slides';
+                try {
+                    const files = await readdir(slidesDir);
+                    const mdFiles = files.filter(f => f.endsWith('.md'));
+                    if (mdFiles.length > 0) {
+                        const firstMd = mdFiles[0];
+                        const content = await readFile(join(slidesDir, firstMd), { encoding: 'utf-8' });
+                        mainWindow.loadURL("http://localhost:3000/open-presentation");
+                        // mainWindow.webContents.removeAllListeners('did-finish-load');
+                        mainWindow.webContents.on('did-finish-load', () => {
+                            mainWindow.webContents.send("file-content", content);
+                        });
+                    } else {
+                        dialog.showErrorBox("No Markdown File", "No .md file found in public/slides.");
+                    }
+                } catch (err) {
+                    dialog.showErrorBox("Error", err.message);
+                }
+            }
+        }
+    },
 ]
 
 if (process.env.NODE_ENV != "production") {
     fileMenuTemplate.push({ role: "toggleDevTools" })
 }
 
+
 const appMenu = Menu.buildFromTemplate([
     {
         label: "File",
         accelerator: "CTRL+I",
         submenu: fileMenuTemplate
+    },
+    {
+        label: "Presentation",
+        accelerator: "CTRL+SHIFT+P",
+        submenu: presentationMenuTemplate
     },
 ])
 
@@ -84,6 +154,43 @@ ipcMain.handle("create-archive", async (event, data) => {
     try {
         await createCodePrezArchive(data);
         return { success: true };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle("get-presentation-md", async () => {
+    const slidesDir = './public/slides';
+    try {
+        const files = await readdir(slidesDir);
+        const mdFiles = files.filter(f => f.endsWith('.md'));
+        if (mdFiles.length > 0) {
+            const firstMd = mdFiles[0];
+            const content = await readFile(join(slidesDir, firstMd), { encoding: 'utf-8' });
+            return { success: true, content };
+        } else {
+            return { success: false, error: "No .md file found in public/slides." };
+        }
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle("get-slides-list", async () => {
+    const slidesDir = './public/slides';
+    try {
+        const files = await readdir(slidesDir);
+        const mdFiles = files.filter(f => f.endsWith('.md'));
+        return { success: true, files: mdFiles };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+ipcMain.handle("get-slide-content", async (event, filename) => {
+    const slidesDir = './public/slides';
+    try {
+        const content = await readFile(join(slidesDir, filename), { encoding: 'utf-8' });
+        return { success: true, content };
     } catch (err) {
         return { success: false, error: err.message };
     }

@@ -3,10 +3,10 @@ import { basename, extname, join } from 'node:path'
 
 export const separate = async (folder) => {
     try {
-        await access(`./presentations/presentation.md`, constants.R_OK);
-        const content = await readFile(`./presentations/presentation.md`, {encoding : "utf-8"});
+        await access(`./public/presentation.md`, constants.R_OK);
+        const content = await readFile(`./public/presentation.md`, {encoding : "utf-8"});
         const slides = content.split("---")
-        await writeSlides(slides, `presentation.md`, `./presentations/slides`)
+        await writeSlides(slides, `presentation.md`, `./public/slides`)
     } catch (e) {
         console.error("Could not access folder " + folder + " : " + e)
     }
