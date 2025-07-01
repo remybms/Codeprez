@@ -4,6 +4,7 @@
     flex-direction: column;
     align-items: center;
     color: #fff;
+    height: 100vh;
 }
 
 .wholePage h2 {
@@ -11,5 +12,32 @@
 }
 
 .logoLink {
-    margin-top: 2rem;
+    margin-top: 1rem;
+}
+
+.presentationContainer button {
+    margin-top: 1rem;
+    border: none;
+    background: linear-gradient(90deg, #ff6ad5, #6a8dff);
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    margin-right: 1rem;
+    text-align: center;
+    padding: 0.3rem 0.6rem;
+}
+
+.presentationContainer button:hover {
+    padding: 0.35rem 0.65rem;
+}
+
+.presentation {
+    width: 100%; 
+    min-height: 80%;
+    max-height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
