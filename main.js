@@ -35,16 +35,16 @@ const createWindow = () => {
 
 const fileMenuTemplate = [
     {
-        label: "Open slide",
-        accelerator: "CTRL+O",
-        click: async () => {
-            let result = await dialog.showOpenDialog(mainWindow, {properties : ['openFile']})
-            const file = result.filePaths
-            unZipFile(file[0], "./presentation")
+        label: "Home page",
+        accelerator: "CTRL+H",
+        click: () => {
+            if (mainWindow) {
+                mainWindow.loadURL("http://localhost:3000");
+            }
         }
     },
     {
-        label: "Save codeprez",
+        label: "Make a codeprez archive",
         accelerator: "CTRL+S",
         click: () => {
             if (mainWindow) {
@@ -53,17 +53,46 @@ const fileMenuTemplate = [
         }
     },
     { type: "separator" },
+    {
+        label: "Open slide",
+        accelerator: "CTRL+O",
+        click: async () => {
+            let result = await dialog.showOpenDialog(mainWindow, {properties : ['openFile']})
+            const file = result.filePaths
+            unZipFile(file[0], "./presentation")
+        }
+    },
+    { type: "separator" },
+    
+]
+
+const presentationMenuTemplate = [
+    {
+        label: "Open presentation mode",
+        accelerator: "CTRL+P",
+        click: () => {
+            if (mainWindow) {
+                mainWindow.loadURL("http://localhost:3000/open-presentation");
+            }
+        }
+    },
 ]
 
 if (process.env.NODE_ENV != "production") {
     fileMenuTemplate.push({ role: "toggleDevTools" })
 }
 
+
 const appMenu = Menu.buildFromTemplate([
     {
         label: "File",
         accelerator: "CTRL+I",
         submenu: fileMenuTemplate
+    },
+    {
+        label: "Presentation",
+        accelerator: "CTRL+SHIFT+P",
+        submenu: presentationMenuTemplate
     },
 ])
 
