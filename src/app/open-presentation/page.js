@@ -55,18 +55,33 @@ export default function Home() {
     }
   };
   
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (slides.length === 0) return;
+      if (e.key === 'ArrowLeft') {
+        if (current > 0) goToSlide(current - 1);
+      } else if (e.key === 'ArrowRight') {
+        if (current < slides.length - 1) goToSlide(current + 1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [current, slides]);
+
   return (
     <div className={styles.wholePage}>
-    <a href="/" className={styles.logoLink}>
-    <img src="./logo/codeprez-full-logo.png" alt="CodePrez Logo" style={{ width: "250px"}} />
-    </a>
-    
-    <div id="presentation" className={styles.presentation} dangerouslySetInnerHTML={{ __html: content ? md.render(content) : "No opened presentations" }} />
-    
-    <div className={styles.presentationContainer} style={{marginBottom: '1rem'}}>
-    <button onClick={() => goToSlide(Math.max(0, current - 1))} disabled={current === 0 || slides.length === 0}>&lt;</button>
-    <button onClick={() => goToSlide(Math.min(slides.length - 1, current + 1))} disabled={current === slides.length - 1 || slides.length === 0}>&gt;</button>
-    </div>
+      <a href="/" className={styles.logoLink}>
+        <img src="./logo/codeprez-full-logo.png" alt="CodePrez Logo" style={{ width: "250px"}} />
+      </a>
+
+      <div id="presentation" className={styles.presentation} dangerouslySetInnerHTML={{ __html: content ? md.render(content) : "No opened presentations" }} />
+
+      <div className={styles.presentationContainer}>
+        <button onClick={() => goToSlide(Math.max(0, current - 1))} disabled={current === 0 || slides.length === 0}>&lt;</button>
+        <button onClick={() => goToSlide(Math.min(slides.length - 1, current + 1))} disabled={current === slides.length - 1 || slides.length === 0}>&gt;</button>
+      </div>
     </div>
   );
 }
