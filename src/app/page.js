@@ -1,25 +1,62 @@
-"use client";
-import { useRouter } from "next/navigation"; 
-// import styles from "./globals.css";
+"use client"
+
 import styles from "./page.module.css";
+import MarkdownIt from "markdown-it";
+import React from "react";
+import hljs from 'highlight.js'
 
 export default function Home() {
-  const router = useRouter();
-  
-  return (
-    <div className={styles.wholePage}>   
-    <a href="/" className={styles.logoLink}>
-      <img src="./logo/codeprez-full-logo.png" alt="CodePrez Logo" style={{ width: "250px"}} />
-    </a>
-    <h1>Welcome to CodePrez</h1> 
-    <br/>
-    <br/>
-    <br/>
-    {/* <button
-      onClick={() => router.push("/create-archive")}>
-      Create an archive
-      </button>     */}
-      </div>
-    );
+
+  const md = new MarkdownIt({
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value;
+      } catch (__) {}
+    }
+
+    return '';
   }
-  
+});
+
+  React.useEffect(() => {
+    let openedFile = "";
+    const markdown = document.querySelector('#presentation')
+    const slidesList = document.querySelector("ul")
+    markdown.innerHTML = "Aucune présentation n'est ouverte"
+    window.api.onOpenFolder((data, files) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/style.css';
+      document.head.appendChild(link);
+      hljs.configure({classPrefix: ""})
+      hljs.highlightAll()
+      markdown.innerHTML = md.render(data)
+      slidesList.innerHTML = ""
+      for (const slide of files) {
+        const li = document.createElement("li")
+        li.textContent = slide
+        slidesList.append(li)
+        li.addEventListener("click", () => {
+          window.api.openFile(slide);
+          openedFile = slide;
+        });
+      }
+    })
+
+    window.api.onFileContent((content) => {
+      markdown.innerHTML = md.render(content)
+      hljs.highlightAll()
+    })
+  }, [])
+
+
+  return (
+    <div className={styles.page}>
+      <main className={styles.main}>
+        <nav className={styles.nav}><ul className={styles.list}></ul></nav>
+        <div id="presentation" className={styles.presentation}></div>
+      </main>
+    </div>
+  );
+}
