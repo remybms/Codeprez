@@ -4,20 +4,11 @@ import styles from "./page.module.css";
 import MarkdownIt from "markdown-it";
 import React from "react";
 import hljs from 'highlight.js'
+import { convertCode } from "../../scripts/convertCode";
 
 export default function Home() {
 
-  const md = new MarkdownIt({
-    highlight: function (str, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return hljs.highlight(str, { language: lang }).value;
-        } catch (__) { }
-      }
-
-      return '';
-    }
-  });
+  const md = new MarkdownIt();
 
   React.useEffect(() => {
     let openedFile = "";
@@ -46,20 +37,8 @@ export default function Home() {
 
     window.api.onFileContent(async (content) => {
       markdown.innerHTML = md.render(content)
-      document.querySelectorAll('a').forEach(async (link) => {
-        console.log(link.href)
-        if (link.href.includes('.js')) {
-          const res = await fetch(link.href);
-          const code = await res.text();
-          const pre = document.createElement('pre');
-          const codeBlock = document.createElement('code');
-          codeBlock.textContent = code;
-          pre.appendChild(codeBlock);
-          link.replaceWith(pre);
-          hljs.highlightAll()
-        }
-      });
       hljs.highlightAll()
+      convertCode(hljs)
     })
   }, [])
 
