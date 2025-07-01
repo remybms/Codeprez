@@ -25,11 +25,12 @@ export default function Home() {
     const slidesList = document.querySelector("ul")
     markdown.innerHTML = "Aucune présentation n'est ouverte"
     window.api.onOpenFolder((data, files) => {
-      md.options.highlight()
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = '/style.css';
       document.head.appendChild(link);
+      hljs.configure({classPrefix: ""})
+      hljs.highlightAll()
       markdown.innerHTML = md.render(data)
       slidesList.innerHTML = ""
       for (const slide of files) {
@@ -45,6 +46,7 @@ export default function Home() {
 
     window.api.onFileContent((content) => {
       markdown.innerHTML = md.render(content)
+      hljs.highlightAll()
     })
   }, [])
 
