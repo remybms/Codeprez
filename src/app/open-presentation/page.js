@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import MarkdownIt from "markdown-it";
 import hljs from 'highlight.js';
 import { useState } from "react";
@@ -10,6 +10,8 @@ export default function Home() {
   const [content, setContent] = useState("");
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
+  const slidesRef = useRef([]);
+  const currentRef = useRef(0);
 
   const md = new MarkdownIt()
 
@@ -23,6 +25,8 @@ export default function Home() {
         document.head.appendChild(link);
         setSlides(listResult.files);
         setCurrent(0);
+        slidesRef.current = listResult.files;
+        currentRef.current = 0;
         const contentResult = await window.api.requestSlideContent(listResult.files[0]);
         if (contentResult.success) {
           setContent(contentResult.content);
@@ -34,9 +38,13 @@ export default function Home() {
       } else {
         setSlides([]);
         setContent("");
+        slidesRef.current = [];
+        currentRef.current = 0;
       }
     })();
     const handleKeyDown = (e) => {
+      const slides = slidesRef.current;
+      const current = currentRef.current;
       if (slides.length === 0) return;
       if (e.key === 'ArrowLeft') {
         if (current > 0) goToSlide(current - 1);
@@ -48,7 +56,15 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [current, slides]);
+  }, []);
+
+  React.useEffect(() => {
+    slidesRef.current = slides;
+  }, [slides]);
+
+  React.useEffect(() => {
+    currentRef.current = current;
+  }, [current]);
 
   const goToSlide = async (idx) => {
     if (slides.length === 0) return;
