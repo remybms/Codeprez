@@ -20,7 +20,7 @@
     gap: 10%;
 }
 .presentationContainer button {
-    margin-top: 1rem;
+    margin-bottom: 0.5rem;
     border: none;
     background: linear-gradient(90deg, #ff6ad5, #6a8dff);
     color: #fff;
