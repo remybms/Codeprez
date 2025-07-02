@@ -23,11 +23,17 @@ export default function Home() {
         link.rel = 'stylesheet';
         link.href = '/style.css';
         document.head.appendChild(link);
-        setSlides(listResult.files);
+        const sortedFiles = [...listResult.files].sort((a, b) => {
+          const aNum = parseInt(a.match(/(\d+)/)?.[1] || '0', 10);
+          const bNum = parseInt(b.match(/(\d+)/)?.[1] || '0', 10);
+          if (aNum !== bNum) return aNum - bNum;
+          return a.localeCompare(b);
+        });
+        setSlides(sortedFiles);
         setCurrent(0);
-        slidesRef.current = listResult.files;
+        slidesRef.current = sortedFiles;
         currentRef.current = 0;
-        const contentResult = await window.api.requestSlideContent(listResult.files[0]);
+        const contentResult = await window.api.requestSlideContent(sortedFiles[0]);
         if (contentResult.success) {
           setContent(contentResult.content);
           setTimeout(() => {
