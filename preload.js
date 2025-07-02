@@ -16,3 +16,9 @@ contextBridge.exposeInMainWorld("api", {
     requestSlidesList: () => ipcRenderer.invoke("get-slides-list"),
     requestSlideContent: (filename) => ipcRenderer.invoke("get-slide-content", filename)
 });
+
+
+contextBridge.exposeInMainWorld("electronAPI", {
+    selectFile: (options) => ipcRenderer.invoke("select-file", options),
+    createArchive: (data) => ipcRenderer.invoke("create-archive", data)
+});
