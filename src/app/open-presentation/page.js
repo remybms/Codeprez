@@ -42,6 +42,9 @@ export default function Home() {
         currentRef.current = 0;
       }
     })();
+  }, []);
+
+  React.useEffect(() => {
     const handleKeyDown = (e) => {
       const slides = slidesRef.current;
       const current = currentRef.current;
@@ -56,7 +59,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [current, slides])
 
   React.useEffect(() => {
     slidesRef.current = slides;
