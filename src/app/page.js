@@ -4,20 +4,11 @@ import styles from "./page.module.css";
 import MarkdownIt from "markdown-it";
 import React from "react";
 import hljs from 'highlight.js'
+import { convertCode } from "../../scripts/convertCode";
 
 export default function Home() {
 
-  const md = new MarkdownIt({
-  highlight: function (str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(str, { language: lang }).value;
-      } catch (__) {}
-    }
-
-    return '';
-  }
-});
+  const md = new MarkdownIt();
 
   React.useEffect(() => {
     let openedFile = "";
@@ -29,7 +20,7 @@ export default function Home() {
       link.rel = 'stylesheet';
       link.href = '/style.css';
       document.head.appendChild(link);
-      hljs.configure({classPrefix: ""})
+      hljs.configure({ classPrefix: "" })
       hljs.highlightAll()
       markdown.innerHTML = md.render(data)
       slidesList.innerHTML = ""
@@ -44,9 +35,10 @@ export default function Home() {
       }
     })
 
-    window.api.onFileContent((content) => {
+    window.api.onFileContent(async (content) => {
       markdown.innerHTML = md.render(content)
       hljs.highlightAll()
+      convertCode(hljs)
     })
   }, [])
 
@@ -55,7 +47,7 @@ export default function Home() {
     <div className={styles.page}>
       <main className={styles.main}>
         <nav className={styles.nav}><ul className={styles.list}></ul></nav>
-        <div id="presentation" className={styles.presentation}></div>
+        <section id="presentation" className={styles.presentation}></section>
       </main>
     </div>
   );
