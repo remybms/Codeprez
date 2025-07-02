@@ -36,7 +36,19 @@ export default function Home() {
         setContent("");
       }
     })();
-  }, []);
+    const handleKeyDown = (e) => {
+      if (slides.length === 0) return;
+      if (e.key === 'ArrowLeft') {
+        if (current > 0) goToSlide(current - 1);
+      } else if (e.key === 'ArrowRight') {
+        if (current < slides.length - 1) goToSlide(current + 1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [current, slides]);
 
   const goToSlide = async (idx) => {
     if (slides.length === 0) return;
@@ -61,7 +73,7 @@ export default function Home() {
 
       <section id="presentation" className={styles.presentation} dangerouslySetInnerHTML={{ __html: content ? md.render(content) : "No opened presentations" }} />
 
-      <div className={styles.presentationContainer} style={{ marginBottom: '1rem' }}>
+      <div className={styles.presentationContainer}>
         <button onClick={() => goToSlide(Math.max(0, current - 1))} disabled={current === 0 || slides.length === 0}>&lt;</button>
         <button onClick={() => goToSlide(Math.min(slides.length - 1, current + 1))} disabled={current === slides.length - 1 || slides.length === 0}>&gt;</button>
       </div>
