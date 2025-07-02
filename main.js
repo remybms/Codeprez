@@ -17,7 +17,7 @@ const createWindow = () => {
         width: 800,
         height: 600,
         show: false,
-        icon: "./public/logo/codeprez-logo.png",
+        icon: join(__dirname, "public", "logo", "codeprez-logo.png"),
         backgroundColor: 'rgb(37 37 37)',
         webPreferences: {
             preload: join(__dirname, "preload.js"),
@@ -36,12 +36,12 @@ const createWindow = () => {
 ipcMain.on("open-file", async (e, data) => {
     try {
         const win = BrowserWindow.getFocusedWindow();
-        const path = join('./public/slides/', data);
-        await access(path, constants.F_OK | constants.R_OK | constants.W_OK);
-        const content = await readFile(path, { encoding: "utf-8" });
+        const filePath = join(__dirname, "public", "slides", data);
+        await access(filePath, constants.F_OK | constants.R_OK | constants.W_OK);
+        const content = await readFile(filePath, { encoding: "utf-8" });
         win.webContents.send("file-content", content);
-        openFiles[path] = content;
-        win.openedFile = path;
+        openFiles[filePath] = content;
+        win.openedFile = filePath;
     }
     catch (e) {
         dialog.showErrorBox("File not found", "Could not open requested file : " + e);
@@ -79,10 +79,10 @@ const fileMenuTemplate = [
             })
             if (!result.canceled) {
                 const file = result.filePaths
-                await unZipFile(file[0], "./public")
+                await unZipFile(file[0], join(__dirname, "public"))
                 await separate()
-                const content = (await readFile(`./public/presentation.md`)).toString()
-                const files = await readdir('./public/slides')
+                const content = (await readFile(join(__dirname, "public", "presentation.md"))).toString()
+                const files = await readdir(join(__dirname, "public", "slides"))
                 win.webContents.send("open-folder", { content: content, files })
             }
         }
@@ -97,7 +97,7 @@ const presentationMenuTemplate = [
         accelerator: "CTRL+P",
         click: async () => {
             if (mainWindow) {
-                const slidesDir = './public/slides';
+                const slidesDir = join(__dirname, "public", "slides");
                 try {
                     const files = await readdir(slidesDir);
                     const mdFiles = files.filter(f => f.endsWith('.md'));
@@ -161,7 +161,7 @@ ipcMain.handle("create-archive", async (event, data) => {
 });
 
 ipcMain.handle("get-presentation-md", async () => {
-    const slidesDir = './public/slides';
+    const slidesDir = join(__dirname, "public", "slides");
     try {
         const files = await readdir(slidesDir);
         const mdFiles = files.filter(f => f.endsWith('.md'));
@@ -178,7 +178,7 @@ ipcMain.handle("get-presentation-md", async () => {
 });
 
 ipcMain.handle("get-slides-list", async () => {
-    const slidesDir = './public/slides';
+    const slidesDir = join(__dirname, "public", "slides");
     try {
         const files = await readdir(slidesDir);
         const mdFiles = files.filter(f => f.endsWith('.md'));
@@ -188,7 +188,7 @@ ipcMain.handle("get-slides-list", async () => {
     }
 });
 ipcMain.handle("get-slide-content", async (event, filename) => {
-    const slidesDir = './public/slides';
+    const slidesDir = join(__dirname, "public", "slides");
     try {
         const content = await readFile(join(slidesDir, filename), { encoding: 'utf-8' });
         return { success: true, content };
